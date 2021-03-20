@@ -24,7 +24,9 @@ exports.getUsers = async (req, res) => {
             exclude: ["createdAt", "updatedAt"],
         },
     });
+    userId = req.userId;
     res.send({
+        ...userId,
         message: "success",
         data: users
     })

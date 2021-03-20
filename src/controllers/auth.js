@@ -105,7 +105,7 @@ exports.login = async (req, res) => {
         if (!checkEmail) {
             return res.status(400).send({
                 status: "Login Failed",
-                message: "Email does not existed"
+                message: "Email and password don't match"
             })
         }
 
@@ -114,7 +114,7 @@ exports.login = async (req, res) => {
         if (!isValidPass) {
             return res.status(400).send({
                 status: "Login Failed",
-                message: "Password is not valid"
+                message: "Email and password don't match"
             })
         }
 
@@ -125,11 +125,12 @@ exports.login = async (req, res) => {
         const idUser = checkEmail.id;
 
         res.send({
-            message: "success",
+            message: "Login Success",
             data: {
                 user: {
-                    name: data.fullname,
-                    email: data.email,
+                    id: checkEmail.id,
+                    name: checkEmail.fullname,
+                    email: checkEmail.email,
                     token,
                 }
             }
@@ -140,6 +141,7 @@ exports.login = async (req, res) => {
         res.status(500).send({
             status: "error",
             message: "Server Error",
+            token
         });
     }
 }
