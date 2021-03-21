@@ -3,13 +3,13 @@ const express = require("express");
 const router = express.Router();
 
 const { auhtenticated } = require('../middlewares/auth');
-const { checkRolePartner, checkRoleUser } = require('../middlewares/checkRole');
+const { checkRolePartner, checkRoleUser, checkRoleAdmin } = require('../middlewares/checkRole');
+const { uploadFile } = require('../middlewares/upload');
 
 const {
     getUsers,
-    // getUser,
-    addUser,
     deleteUser,
+    editUser
 } = require("../controllers/user");
 
 const {
@@ -17,12 +17,13 @@ const {
     login
 } = require("../controllers/auth");
 
-router.get("/users", auhtenticated, checkRolePartner, getUsers);
-// router.get("/user/:id", getUser);
-router.post("/user", addUser);
-router.delete("/user/:id", deleteUser);
+// Untuk Admin
+router.get("/users", auhtenticated, checkRoleAdmin, getUsers);
+router.delete("/user/:id", auhtenticated, checkRoleAdmin, deleteUser);
 
-router.post("/register", register);
+// Untuk User/Partner
 router.post("/login", login);
+router.post("/register", register);
+router.patch("/edit-user", auhtenticated, checkRoleUser, uploadFile("imageFile"), editUser);
 
 module.exports = router;

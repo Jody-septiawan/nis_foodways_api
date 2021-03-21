@@ -89,3 +89,39 @@ exports.deleteUser = async (req, res) => {
         });
     }
 }
+
+exports.editUser = async (req, res) => {
+    try {
+
+        const path = "http://localhost:5000/uploads/";
+        const id = req.userId.id;
+        var data = req.body;
+        var image = req.files.imageFile[0].filename;
+
+        data = {
+            ...data,
+            image
+        }
+
+        const updatedUserId = await user.update(data, {
+            where: {
+                id,
+            },
+        });
+
+        res.send({
+            status: "success",
+            message: "User Succesfully Updated",
+            data: {
+                updatedUserId,
+            },
+        });
+
+    } catch (err) {
+        console.log(err)
+        res.status(400).send({
+            status: "error",
+            message: `Not Succesfully Edit user id : ${id}`,
+        });
+    }
+}
