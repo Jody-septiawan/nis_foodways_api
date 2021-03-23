@@ -1,13 +1,13 @@
 const multer = require("multer");
 
-exports.uploadFile = (imageFile, videoFile) => {
+exports.uploadFileProduct = (imageFile, videoFile) => {
     //initialisasi multer diskstorage
     //menentukan destionation file diupload
     //menentukan nama file (rename agar tidak ada nama file ganda)
     const fileName = "";
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
-            cb(null, "uploads"); //lokasih penyimpan file
+            cb(null, "uploads/product"); //lokasih penyimpan file
         },
         filename: function (req, file, cb) {
             cb(null, Date.now() + "-" + file.originalname.replace(/\s/g, '')); //rename nama file by date now + nama original

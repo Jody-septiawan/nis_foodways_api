@@ -1,4 +1,6 @@
 const { user } = require("../../models/");
+const Joi = require('joi');
+const fs = require('fs');
 
 let Users = [
     {
@@ -19,34 +21,24 @@ let Users = [
 
 // Get All User
 exports.getUsers = async (req, res) => {
-    const users = await user.findAll({
-        attributes: {
-            exclude: ["createdAt", "updatedAt"],
-        },
-    });
-    userId = req.userId;
-    res.send({
-        ...userId,
-        message: "success",
-        data: users
-    })
-    // try {
-    //     const usersData = await users.findAll();
-
-    //     res.send({
-    //         status: "success",
-    //         message: "Users Succesfully Get",
-    //         data: {
-    //             usersData,
-    //         },
-    //     });
-    // } catch (err) {
-    //     console.log(err);
-    //     res.status(500).send({
-    //         status: "error",
-    //         message: "Server Error",
-    //     });
-    // }
+    try {
+        const users = await user.findAll({
+            attributes: {
+                exclude: ["createdAt", "updatedAt", "password", "gender"],
+            },
+        });
+        userId = req.userId;
+        res.send({
+            message: "success",
+            data: users
+        })
+    } catch (err) {
+        console.log(err);
+        res.status(500).send({
+            status: "error",
+            message: "Server Error",
+        });
+    }
 };
 
 exports.addUser = async (req, res) => {
@@ -71,18 +63,40 @@ exports.addUser = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
     try {
-        const { id } = req.params;
+        const id = req.params.id;
+
+        const findUser = await user.findOne({
+            where: {
+                id
+            }
+        })
+
+        if (findUser.role == "ADMIN") {
+            return res.send({
+                status: "Failed",
+                message: "Cannot delete ADMIN"
+            });
+        }
+
+        if (findUser.image) {
+            fs.unlink('uploads/user/' + findUser.image, function () {
+                console.log('write operation complete.');
+            });
+        }
+
         await user.destroy({
             where: {
                 id,
             },
         });
+
         res.send({
             status: "success",
             message: `Succesfully Delete user id : ${id}`,
         });
+
     } catch (err) {
-        console.log(er)
+        console.log(err)
         res.status(500).send({
             status: "error",
             message: `Succesfully Delete user id : ${id}`,
@@ -92,36 +106,82 @@ exports.deleteUser = async (req, res) => {
 
 exports.editUser = async (req, res) => {
     try {
-
         const path = "http://localhost:5000/uploads/";
         const id = req.userId.id;
-        var data = req.body;
-        var image = req.files.imageFile[0].filename;
+        const dataUpdate = req.body;
 
-        data = {
-            ...data,
-            image
-        }
 
-        const updatedUserId = await user.update(data, {
+        const userSelected = await user.findOne({
             where: {
                 id,
             },
+            attributes: {
+                exclude: ["role", "password", "createdAt", "updatedAt"]
+            }
+        });
+
+        if (!userSelected) {
+            return res.status(404).send({
+                status: "Error",
+                message: "User doesn't exist",
+            });
+        }
+
+        if (userSelected && userSelected.id !== req.userId.id) {
+            return res.status(402).send({
+                status: "Error",
+                message: "You haven't authorization for edit this user"
+            });
+        }
+
+        const shcema = Joi.object({
+            fullname: Joi.string().min(3).max(50),
+            email: Joi.string().email().max(50),
+            phone: Joi.string().min(10).max(13),
+            location: Joi.string(),
+        });
+
+        const { error } = shcema.validate(dataUpdate);
+
+        if (error) {
+            return res.status(400).send({
+                status: "There's error in your data input",
+                message: error.details[0].message,
+            });
+        }
+
+        let newImage;
+
+        if (req.files.imageFile === undefined) {
+            newImage = userSelected.image;
+        } else {
+            newImage = req.files.imageFile[0].filename;
+        }
+
+        const userUpdated = {
+            ...req.body,
+            image: newImage
+        }
+
+        await user.update(userUpdated, {
+            where: {
+                id
+            }
         });
 
         res.send({
             status: "success",
-            message: "User Succesfully Updated",
+            message: "Update user data Success",
             data: {
-                updatedUserId,
-            },
+                dataUpdated: userUpdated
+            }
         });
 
     } catch (err) {
         console.log(err)
         res.status(400).send({
             status: "error",
-            message: `Not Succesfully Edit user id : ${id}`,
+            message: `Not Succesfully Edit user`,
         });
     }
 }

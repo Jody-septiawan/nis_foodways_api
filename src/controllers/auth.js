@@ -7,7 +7,7 @@ const secretKey = "243hj2hk35ghfg";
 
 exports.register = async (req, res) => {
     try {
-        const { email, password, fullname, gender, phone, role } = req.body;
+        const { email, password } = req.body;
         const data = req.body;
 
         const schema = joi.object({
@@ -53,8 +53,6 @@ exports.register = async (req, res) => {
         const token = jwt.sign({
             id: userInput.id
         }, secretKey);
-
-        const idUser = userInput.id;
 
         res.send({
             message: "success",
@@ -121,8 +119,6 @@ exports.login = async (req, res) => {
         const token = jwt.sign({
             id: checkEmail.id
         }, secretKey);
-
-        const idUser = checkEmail.id;
 
         res.send({
             message: "Login Success",

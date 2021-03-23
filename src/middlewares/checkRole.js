@@ -1,6 +1,5 @@
 const { user } = require("../../models/");
 
-
 exports.checkRolePartner = async (req, res, next) => {
     try {
         const userData = await user.findOne({
