@@ -31,7 +31,14 @@ const {
     editProduct
 } = require("../controllers/partner");
 
-const { addTransaction } = require("../controllers/transaction");
+const {
+    addTransaction,
+    getTransactions,
+    getDetailTransaction,
+    editTransaction,
+    deleteTransaction,
+    getUserTransaction
+} = require("../controllers/transaction");
 
 // Auth
 router.post("/login", login);
@@ -54,6 +61,11 @@ router.patch("/product/:id", auhtenticated, uploadFileProduct("imageFile"), edit
 
 // transaction
 router.post("/transaction", auhtenticated, checkRoleUser, addTransaction);
+router.get("/transactions/:id", auhtenticated, getTransactions);
+router.get("/transaction/:id", auhtenticated, getDetailTransaction);
+router.patch("/transaction/:id", auhtenticated, editTransaction);
+router.delete("/transaction/:id", auhtenticated, deleteTransaction);
+router.get("/my-transactions", auhtenticated, getUserTransaction);
 
 
 module.exports = router;
